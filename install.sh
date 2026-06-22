@@ -39,14 +39,14 @@ echo "3/6: 下载并解压"
             exit 1
         fi
         echo -e "Got s-ui latest version: ${last_version}, beginning the installation..."
-        wget -N --no-check-certificate -O $TMPDIR/s-ui.tar.gz https://github.com/alireza0/s-ui/releases/download/${last_version}/s-ui-linux-$(arch).tar.gz
+        wget -N --no-check-certificate -O $TMPDIR/s-ui.tar.gz https://github.com/alireza0/s-ui/releases/download/${last_version}/s-ui-linux-amd64.tar.gz
         if [[ $? -ne 0 ]]; then
             echo -e "${red}Downloading s-ui failed, please be sure that your server can access Github ${plain}"
             exit 1
         fi
     else
         last_version=$1
-        url="https://github.com/alireza0/s-ui/releases/download/${last_version}/s-ui-linux-$(arch).tar.gz"
+        url="https://github.com/alireza0/s-ui/releases/download/${last_version}/s-ui-linux-amd64.tar.gz"
         echo -e "Beginning the install s-ui v$1"
         wget -N --no-check-certificate -O $TMPDIR/s-ui.tar.gz ${url}
         if [[ $? -ne 0 ]]; then
