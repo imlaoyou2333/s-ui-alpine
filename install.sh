@@ -1,7 +1,6 @@
 #!/bin/sh
 set -e
 
-URL="https://s-ui.alireza0.dev/download/s-ui-linux-amd64.tar.gz"
 INSTALL_DIR="/usr/local/s-ui"
 BIN_NAME="sui"
 SERVICE_NAME="s-ui"
@@ -33,7 +32,28 @@ echo "2/6: 创建安装目录"
 mkdir -p "$INSTALL_DIR"
 
 echo "3/6: 下载并解压"
-curl -fsSL "$URL" -o "$TARFILE"
+    if [ $# == 0 ]; then
+        last_version=$(curl -Ls "https://api.github.com/repos/alireza0/s-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        if [[ ! -n "$last_version" ]]; then
+            echo -e "${red}Failed to fetch s-ui version, it maybe due to Github API restrictions, please try it later${plain}"
+            exit 1
+        fi
+        echo -e "Got s-ui latest version: ${last_version}, beginning the installation..."
+        wget -N --no-check-certificate -O $TMPDIR/s-ui.tar.gz https://github.com/alireza0/s-ui/releases/download/${last_version}/s-ui-linux-$(arch).tar.gz
+        if [[ $? -ne 0 ]]; then
+            echo -e "${red}Downloading s-ui failed, please be sure that your server can access Github ${plain}"
+            exit 1
+        fi
+    else
+        last_version=$1
+        url="https://github.com/alireza0/s-ui/releases/download/${last_version}/s-ui-linux-$(arch).tar.gz"
+        echo -e "Beginning the install s-ui v$1"
+        wget -N --no-check-certificate -O $TMPDIR/s-ui.tar.gz ${url}
+        if [[ $? -ne 0 ]]; then
+            echo -e "${red}download s-ui v$1 failed,please check the version exists${plain}"
+            exit 1
+        fi
+    fi
 tar -xz -C "$TMPDIR" -f "$TARFILE"
 
 # 仅在压缩包根目录查找 sui
