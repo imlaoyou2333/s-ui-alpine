@@ -5,7 +5,6 @@ URL="https://s-ui.alireza0.dev/download/s-ui-linux-amd64.tar.gz"
 INSTALL_DIR="/usr/local/s-ui"
 BIN_NAME="sui"
 SERVICE_NAME="s-ui"
-USER_NAME="sui"
 TMPDIR="$(mktemp -d)"
 TARFILE="$TMPDIR/s-ui.tar.gz"
 
@@ -30,19 +29,8 @@ fi
 echo "1/6: 安装必要包 (curl tar)"
 apk add --no-cache curl tar
 
-echo "2/6: 创建安装目录与运行用户/组"
-# 创建系统组（若已存在则忽略）
-if ! getent group "$USER_NAME" >/dev/null 2>&1; then
-  addgroup -S "$USER_NAME"
-fi
-# 创建系统用户并加入同名组（若已存在则忽略）
-if ! id -u "$USER_NAME" >/dev/null 2>&1; then
-  adduser -S -G "$USER_NAME" -H -s /sbin/nologin "$USER_NAME"
-fi
-
+echo "2/6: 创建安装目录"
 mkdir -p "$INSTALL_DIR"
-chown "$USER_NAME":"$USER_NAME" "$INSTALL_DIR"
-chmod 755 "$INSTALL_DIR"
 
 echo "3/6: 下载并解压"
 curl -fsSL "$URL" -o "$TARFILE"
@@ -59,15 +47,12 @@ fi
 
 echo "4/6: 安装二进制到 $INSTALL_DIR"
 mv "$FOUND_BIN" "$INSTALL_DIR/$BIN_NAME"
-chown "$USER_NAME":"$USER_NAME" "$INSTALL_DIR/$BIN_NAME"
-chmod 755 "$INSTALL_DIR/$BIN_NAME"
 
 echo "5/6: 创建 openrc 服务脚本 /etc/init.d/$SERVICE_NAME"
 cat > /etc/init.d/$SERVICE_NAME <<'EOF'
 #!/sbin/openrc-run
 # OpenRC init script for s-ui
 command="/usr/local/s-ui/sui"
-command_user="sui:sui"
 pidfile="/var/run/s-ui.pid"
 name="s-ui"
 
@@ -105,4 +90,4 @@ echo "6/6: 启用并启动服务"
 rc-update add $SERVICE_NAME default
 rc-service $SERVICE_NAME start
 
-echo "安装完成：$INSTALL_DIR/$BIN_NAME（以用户 $USER_NAME 运行），service 名称：$SERVICE_NAME"
+echo "安装完成：$INSTALL_DIR/$BIN_NAME ,service 名称：$SERVICE_NAME"
