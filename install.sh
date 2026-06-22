@@ -30,8 +30,16 @@ fi
 echo "1/6: 安装必要包 (curl tar)"
 apk add --no-cache curl tar
 
-echo "2/6: 创建安装目录与运行用户"
-adduser -S -H -G nogroup -s /sbin/nologin "$USER_NAME" || true
+echo "2/6: 创建安装目录与运行用户/组"
+# 创建系统组（若已存在则忽略）
+if ! getent group "$USER_NAME" >/dev/null 2>&1; then
+  addgroup -S "$USER_NAME"
+fi
+# 创建系统用户并加入同名组（若已存在则忽略）
+if ! id -u "$USER_NAME" >/dev/null 2>&1; then
+  adduser -S -G "$USER_NAME" -H -s /sbin/nologin "$USER_NAME"
+fi
+
 mkdir -p "$INSTALL_DIR"
 chown "$USER_NAME":"$USER_NAME" "$INSTALL_DIR"
 chmod 755 "$INSTALL_DIR"
